@@ -5,9 +5,11 @@ import { Router } from '@angular/router';
 import { User } from '../../models/user';
 import { ViewUserDetailsComponent } from "../view-user-details/view-user-details.component";
 import Notiflix from 'notiflix';
+import { SortDirection, TableSortComponent } from '../shared/sort';
+import { UserSearchComponent } from "../shared/search";
 @Component({
   selector: 'app-user-list',
-  imports: [ViewUserDetailsComponent],
+  imports: [ViewUserDetailsComponent, UserSearchComponent, TableSortComponent],
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.css',
 })
@@ -28,6 +30,11 @@ export class UserListComponent {
   totalPages = computed(() => this.userService.totalPages());
   pageSize = computed(() => this.userService.PageSize); // call the getter
   tableColumns = signal<string[]>(['id', 'name']);
+
+    // Search and sort signals
+    searchTerm = signal<string>('');
+    sortColumn = signal<string>('id');
+    sortDirection = signal<SortDirection>('asc');
 
   // Available page sizes
   pageSizeOptions = [5, 10, 20, 50];
@@ -243,7 +250,7 @@ export class UserListComponent {
     );
   }
 
-  searchTerm = signal<string>('');
+
 
 filteredUsers = computed(() => {
   const term = this.searchTerm().toLowerCase();
@@ -252,5 +259,50 @@ filteredUsers = computed(() => {
     user.language.toLowerCase().includes(term) ||
     user.bio.toLowerCase().includes(term)
   );
+});
+
+ // Search and sort handlers
+ handleSearchClear(): void {
+  this.searchTerm.set('');
+}
+
+handleSortChange(event: {column: string, direction: SortDirection}): void {
+  console.log(`Sorting by ${event.column} in ${event.direction} order`);
+}
+
+// Combined computed property for filtered and sorted users
+filteredAndSortedUsers = computed(() => {
+  const term = this.searchTerm().toLowerCase();
+  const column = this.sortColumn();
+  const direction = this.sortDirection();
+  
+  // First filter the users
+  let result = this.users().filter(user => 
+    user.name.toLowerCase().includes(term) ||
+    user.language?.toLowerCase().includes(term) ||
+    user.bio?.toLowerCase().includes(term) ||
+    user.id.toLowerCase().includes(term)
+  );
+  
+  // Then sort the filtered results
+  return result.sort((a, b) => {
+    const aValue = this.getPropertyValue(a, column);
+    const bValue = this.getPropertyValue(b, column);
+    
+    // Handle different data types
+    if (typeof aValue === 'number' && typeof bValue === 'number') {
+      return direction === 'asc' ? aValue - bValue : bValue - aValue;
+    }
+    
+    // For string comparison
+    const aString = String(aValue || '').toLowerCase();
+    const bString = String(bValue || '').toLowerCase();
+    
+    if (direction === 'asc') {
+      return aString.localeCompare(bString);
+    } else {
+      return bString.localeCompare(aString);
+    }
+  });
 });
 }
