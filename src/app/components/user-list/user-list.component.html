@@ -1,7 +1,9 @@
 <div class="user-list-container">
     <h1>User Management</h1>
-          <!-- Search component -->
-          <app-user-search [(searchTerm)]="searchTerm" (clear)="handleSearchClear()"></app-user-search>
+
+
+    <!-- Search component -->
+    <app-user-search [(searchTerm)]="searchTerm" (clear)="handleSearchClear()"></app-user-search>
 
     <div class="pagination-controls">
       <div class="pagination-info">
@@ -75,7 +77,7 @@
                 <button (click)="cancelEditing(); $event.stopPropagation()">Cancel</button>
               </td>
             } @else {
-              <!-- When not editing, show data for visible columns -->
+            
               @for (header of visibleHeaders(); track header) {
                 <td>
                   @if (header === 'bio') {

@@ -34,25 +34,24 @@ export type SortDirection = 'asc' | 'desc';
   `]
 })
 export class TableSortComponent {
-  // Input signals
+ 
   column = input.required<string>();
   label = input<string>('');
   
   // Two-way binding for active column and direction
   activeColumn = model<string>('');
   sortDirection = model<SortDirection>('asc');
-  
-  // Output event when sort changes
+ 
   sortChanged = output<{column: string, direction: SortDirection}>();
 
   toggleSort(): void {
     if (this.activeColumn() === this.column()) {
-      // Toggle direction if already sorting by this column
-      const newDirection = this.sortDirection() === 'asc' ? 'desc' : 'asc';
+    
+      const newDirection = this.sortDirection() === 'asc' ? 'desc' : 'asc';  // Toggle direction if already sorting by this column
       this.sortDirection.set(newDirection);
     } else {
-      // Set new column and default to ascending
-      this.activeColumn.set(this.column());
+      
+      this.activeColumn.set(this.column());// Set new column and default to ascending
       this.sortDirection.set('asc');
     }
     

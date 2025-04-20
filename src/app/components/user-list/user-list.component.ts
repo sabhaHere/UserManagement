@@ -23,6 +23,7 @@ export class UserListComponent {
   editedUser = signal<User | null>(null);
   headers = signal<string[]>([]); // to add the headers dynamically
 
+
   selectedUser = signal<User | null>(null); // for showing the details of selected user in the modal
 
   users = computed(() => this.userService.paginatedUsers());
@@ -107,7 +108,7 @@ export class UserListComponent {
     this.editedUser.set({ ...user });
   }
 
-  // Show confirmation dialog with Notiflix
+  // method for editing the user details
   saveEditedUser() {
     const userToSave = this.editedUser();
     if (userToSave) {
@@ -129,7 +130,7 @@ export class UserListComponent {
     }
   }
 
-  // Show confirmation dialog with Notiflix
+  // method for cancel the editing
   cancelEditing(): void {
     Notiflix.Confirm.show(
       'Cancel Editing',
@@ -145,6 +146,7 @@ export class UserListComponent {
     );
   }
 
+  // method for update the user details
   updateEditedUser(property: string, value: any) {
     const currentUser = this.editedUser();
     if (currentUser) {
@@ -192,6 +194,7 @@ export class UserListComponent {
     return [current - 2, current - 1, current, current + 1, current + 2];
   }
 
+  // method to dynamically update the user object
   handleInputChange(event: Event, property: string): void {
     const target = event.target as HTMLInputElement | HTMLTextAreaElement;
     const value = target.value;
@@ -212,7 +215,6 @@ export class UserListComponent {
   });
 
   getPropertyValue(user: User, propertyName: string): any {
-    // Add cases for all other possible properties in your User model
     switch (propertyName) {
       case 'id':
         return user.id;
@@ -234,6 +236,7 @@ export class UserListComponent {
     this.selectedUser.set(null);
   }
 
+  // method for deleting the user
   deleteUser(id: string): void {
     Notiflix.Confirm.show(
       'Delete User',
@@ -284,7 +287,7 @@ filteredAndSortedUsers = computed(() => {
     user.id.toLowerCase().includes(term)
   );
   
-  // Then sort the filtered results
+  // sort the filtered results
   return result.sort((a, b) => {
     const aValue = this.getPropertyValue(a, column);
     const bValue = this.getPropertyValue(b, column);

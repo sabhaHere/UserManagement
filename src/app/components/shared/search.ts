@@ -58,7 +58,7 @@ export class UserSearchComponent {
   // Using the new model() API for two-way binding
   searchTerm = model<string>('');
   
-  // Legacy output approach for clearing search
+
   @Output() clear = new EventEmitter<void>();
 
   handleSearch(event: Event): void {
