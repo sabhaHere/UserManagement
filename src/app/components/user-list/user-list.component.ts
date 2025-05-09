@@ -7,6 +7,7 @@ import { ViewUserDetailsComponent } from "../view-user-details/view-user-details
 import Notiflix from 'notiflix';
 import { SortDirection, TableSortComponent } from '../shared/sort';
 import { UserSearchComponent } from "../shared/search";
+import { NotiflixConfig } from '../utils/notiflix-config';
 @Component({
   selector: 'app-user-list',
   imports: [ViewUserDetailsComponent, UserSearchComponent, TableSortComponent],
@@ -23,7 +24,6 @@ export class UserListComponent {
   editedUser = signal<User | null>(null);
   headers = signal<string[]>([]); // to add the headers dynamically
 
-
   selectedUser = signal<User | null>(null); // for showing the details of selected user in the modal
 
   users = computed(() => this.userService.paginatedUsers());
@@ -32,10 +32,10 @@ export class UserListComponent {
   pageSize = computed(() => this.userService.PageSize); // call the getter
   tableColumns = signal<string[]>(['id', 'name']);
 
-    // Search and sort signals
-    searchTerm = signal<string>('');
-    sortColumn = signal<string>('id');
-    sortDirection = signal<SortDirection>('asc');
+  // Search and sort signals
+  searchTerm = signal<string>('');
+  sortColumn = signal<string>('id');
+  sortDirection = signal<SortDirection>('asc');
 
   // Available page sizes
   pageSizeOptions = [5, 10, 20, 50];
@@ -55,42 +55,7 @@ export class UserListComponent {
       this.userList.set(this.userService.UsersList);
     });
 
-    // Initialize Notiflix with custom settings
-    Notiflix.Confirm.init({
-      titleColor: '#1775ee',
-      okButtonBackground: '#1775ee',
-      cancelButtonBackground: '#a9a9a9',
-      width: '320px',
-      borderRadius: '8px',
-      fontFamily: 'Arial, sans-serif',
-      cssAnimationStyle: 'zoom',
-    });
-
-    Notiflix.Notify.init({
-      position: 'right-top',
-      width: '280px',
-      distance: '10px',
-      opacity: 1,
-      borderRadius: '5px',
-      fontFamily: 'Arial, sans-serif',
-      cssAnimationStyle: 'fade',
-      success: {
-        background: '#32c682',
-        textColor: '#fff',
-      },
-      failure: {
-        background: '#ff5549',
-        textColor: '#fff',
-      },
-      warning: {
-        background: '#eebf31',
-        textColor: '#fff',
-      },
-      info: {
-        background: '#26c0d3',
-        textColor: '#fff',
-      },
-    });
+    NotiflixConfig.initialize();
   }
 
   showUserDetails(user: User) {
@@ -253,59 +218,61 @@ export class UserListComponent {
     );
   }
 
-
-
-filteredUsers = computed(() => {
-  const term = this.searchTerm().toLowerCase();
-  return this.userService.paginatedUsers().filter(user =>
-    user.name.toLowerCase().includes(term) ||
-    user.language.toLowerCase().includes(term) ||
-    user.bio.toLowerCase().includes(term)
-  );
-});
-
- // Search and sort handlers
- handleSearchClear(): void {
-  this.searchTerm.set('');
-}
-
-handleSortChange(event: {column: string, direction: SortDirection}): void {
-  console.log(`Sorting by ${event.column} in ${event.direction} order`);
-}
-
-// Combined computed property for filtered and sorted users
-filteredAndSortedUsers = computed(() => {
-  const term = this.searchTerm().toLowerCase();
-  const column = this.sortColumn();
-  const direction = this.sortDirection();
-  
-  // First filter the users
-  let result = this.users().filter(user => 
-    user.name.toLowerCase().includes(term) ||
-    user.language?.toLowerCase().includes(term) ||
-    user.bio?.toLowerCase().includes(term) ||
-    user.id.toLowerCase().includes(term)
-  );
-  
-  // sort the filtered results
-  return result.sort((a, b) => {
-    const aValue = this.getPropertyValue(a, column);
-    const bValue = this.getPropertyValue(b, column);
-    
-    // Handle different data types
-    if (typeof aValue === 'number' && typeof bValue === 'number') {
-      return direction === 'asc' ? aValue - bValue : bValue - aValue;
-    }
-    
-    // For string comparison
-    const aString = String(aValue || '').toLowerCase();
-    const bString = String(bValue || '').toLowerCase();
-    
-    if (direction === 'asc') {
-      return aString.localeCompare(bString);
-    } else {
-      return bString.localeCompare(aString);
-    }
+  filteredUsers = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    return this.userService
+      .paginatedUsers()
+      .filter(
+        (user) =>
+          user.name.toLowerCase().includes(term) ||
+          user.language.toLowerCase().includes(term) ||
+          user.bio.toLowerCase().includes(term)
+      );
   });
-});
+
+  // Search and sort handlers
+  handleSearchClear(): void {
+    this.searchTerm.set('');
+  }
+
+  handleSortChange(event: { column: string; direction: SortDirection }): void {
+    console.log(`Sorting by ${event.column} in ${event.direction} order`);
+  }
+
+  // Combined computed property for filtered and sorted users
+  filteredAndSortedUsers = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    const column = this.sortColumn();
+    const direction = this.sortDirection();
+
+    // First filter the users
+    let result = this.users().filter(
+      (user) =>
+        user.name.toLowerCase().includes(term) ||
+        user.language?.toLowerCase().includes(term) ||
+        user.bio?.toLowerCase().includes(term) ||
+        user.id.toLowerCase().includes(term)
+    );
+
+    // sort the filtered results
+    return result.sort((a, b) => {
+      const aValue = this.getPropertyValue(a, column);
+      const bValue = this.getPropertyValue(b, column);
+
+      // Handle different data types
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return direction === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+
+      // For string comparison
+      const aString = String(aValue || '').toLowerCase();
+      const bString = String(bValue || '').toLowerCase();
+
+      if (direction === 'asc') {
+        return aString.localeCompare(bString);
+      } else {
+        return bString.localeCompare(aString);
+      }
+    });
+  });
 }
